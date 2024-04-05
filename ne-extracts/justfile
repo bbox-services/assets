@@ -1,0 +1,66 @@
+#!/usr/bin/env just --justfile
+
+set shell := ["bash", "-c"]
+
+DBNAME := "ne_extracts"
+# Default via Unix socket
+# For TCP connections call e.g. with --set DATABASE_URL "postgres://user:pass@localhost:5432/mvtbench"
+export DATABASE_URL := "postgres:///" + DBNAME
+
+@_default:
+    {{ just_executable() }} --list --unsorted
+
+
+# --- Create Natural Earth extracts
+
+# https://www.naturalearthdata.com/downloads/
+# Version 5.1.2
+
+dl := "download"
+ne_gpkg := dl + "/packages/natural_earth_vector.gpkg"
+data := "../docs/data"
+
+# Download NE data and extract layers
+create-extracts: download-ne (create-extract "4326" data + "/ne_extracts_4326.gpkg") (create-extract "3857" data + "/ne_extracts_3857.gpkg") (create-extract "8857" data + "/ne_extracts_8857.gpkg")
+
+download-ne:
+    mkdir -p {{dl}}
+    cd {{dl}}; test -f natural_earth_vector.gpkg.zip || wget https://naciscdn.org/naturalearth/packages/natural_earth_vector.gpkg.zip
+    cd {{dl}}; test -f packages/natural_earth_vector.gpkg || unzip natural_earth_vector.gpkg.zip
+
+create-extract srid gpkg:
+    rm -f {{gpkg}}
+    mkdir -p {{data}}
+    ogr2ogr {{gpkg}} -t_srs EPSG:{{srid}} -nlt PROMOTE_TO_MULTI -nln ne_10m_admin_0_countries {{ne_gpkg}} ne_10m_admin_0_countries_deu
+    ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -nln ne_10m_admin_0_country_points -nlt POINT -dialect sqlite -sql "SELECT name, abbrev, ST_Centroid(geom) AS geom from ne_10m_admin_0_map_units" {{ne_gpkg}}
+    ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -nlt PROMOTE_TO_MULTI {{ne_gpkg}} ne_10m_admin_0_boundary_lines_land
+    ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -nlt PROMOTE_TO_MULTI {{ne_gpkg}} ne_10m_admin_1_states_provinces_lines
+    ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -nlt PROMOTE_TO_MULTI {{ne_gpkg}} ne_10m_geographic_lines
+    ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -nlt PROMOTE_TO_MULTI {{ne_gpkg}} ne_50m_geographic_lines
+    ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -select scalerank,featurecla,name -nlt PROMOTE_TO_MULTI {{ne_gpkg}} ne_10m_rivers_lake_centerlines
+    ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -select scalerank,featurecla,name -nlt PROMOTE_TO_MULTI {{ne_gpkg}} ne_10m_lakes
+    ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -select scalerank,labelrank,featurecla,name {{ne_gpkg}} ne_10m_populated_places
+
+
+# --- Create PostGIS DB for BBOX
+
+# Setup DB and import data
+create-extracts-db: create-db (import-extract "ne_4326" data + "/ne_extracts_4326.gpkg") (import-extract "ne_3857" data + "/ne_extracts_3857.gpkg") (import-extract "ne_8857" data + "/ne_extracts_8857.gpkg")
+
+# Create database
+create-db:
+    psql postgres -c "DROP DATABASE IF EXISTS {{DBNAME}}"
+    psql postgres -c "CREATE DATABASE {{DBNAME}}"
+    psql {{DBNAME}} -c "CREATE EXTENSION postgis"
+
+import-extract schema gpkg:
+    psql {{DBNAME}} -c "CREATE SCHEMA IF NOT EXISTS {{schema}}"
+    ogr2ogr -f PostgreSQL "PG:dbname={{DBNAME}}" -lco GEOMETRY_NAME=wkb_geometry -lco SCHEMA={{schema}} {{gpkg}}
+
+# Seed tiles (Mercator)
+seed-3857:
+    bbox-tile-server --config=bbox-ne_extracts_3857.toml seed --tileset ne_countries --maxzoom 6
+
+# Run bbox tile server (Mercator)
+serve-3857:
+    bbox-tile-server --config=bbox-ne_extracts_3857.toml serve

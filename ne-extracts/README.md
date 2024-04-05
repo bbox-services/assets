@@ -1,0 +1,19 @@
+# Natural Earth extract
+
+The dataset uses a minimal subset of the [NaturalEarth](https://www.naturalearthdata.com/) 5.1 data set.
+
+It reproduces the data set used in https://github.com/pka/mvt-benchmark
+
+## Creation
+
+Download NaturalEarth data and create GeoPackage files:
+
+    create-extracts
+
+Import GeoPackage files into PostGIS database:
+
+    just create-extracts-db
+
+Create tiles:
+
+    just seed-3857
