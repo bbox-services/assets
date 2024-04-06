@@ -35,8 +35,8 @@ create-extract srid gpkg:
     ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -nln ne_10m_admin_0_country_points -nlt POINT -dialect sqlite -sql "SELECT name, abbrev, ST_Centroid(geom) AS geom from ne_10m_admin_0_map_units" {{ne_gpkg}}
     ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -nlt PROMOTE_TO_MULTI {{ne_gpkg}} ne_10m_admin_0_boundary_lines_land
     ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -nlt PROMOTE_TO_MULTI {{ne_gpkg}} ne_10m_admin_1_states_provinces_lines
-    ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -nlt PROMOTE_TO_MULTI {{ne_gpkg}} ne_10m_geographic_lines
-    ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -nlt PROMOTE_TO_MULTI {{ne_gpkg}} ne_50m_geographic_lines
+    ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -nlt PROMOTE_TO_MULTI -where "featurecla!='Date line'" {{ne_gpkg}} ne_10m_geographic_lines
+    ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -nlt PROMOTE_TO_MULTI -where "featurecla!='Date line'" {{ne_gpkg}} ne_50m_geographic_lines
     ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -select scalerank,featurecla,name -nlt PROMOTE_TO_MULTI {{ne_gpkg}} ne_10m_rivers_lake_centerlines
     ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -select scalerank,featurecla,name -nlt PROMOTE_TO_MULTI {{ne_gpkg}} ne_10m_lakes
     ogr2ogr {{gpkg}} -update -t_srs EPSG:{{srid}} -select scalerank,labelrank,featurecla,name {{ne_gpkg}} ne_10m_populated_places
@@ -59,11 +59,12 @@ import-extract schema gpkg:
 
 # Seed tiles (Mercator)
 seed-3857:
-    bbox-tile-server --config=bbox-ne_extracts_3857.toml seed --tileset ne_countries --maxzoom 6
+    bbox-tile-server --config=bbox-ne_extracts_3857.toml seed --tile-path=../docs/tiles/ne_extracts_3857 --tileset ne_countries --maxzoom 6
 
 # Run bbox tile server (Mercator)
 serve-3857:
-    bbox-tile-server --config=bbox-ne_extracts_3857.toml serve
+    export BBOX_MAPSERVER__NUM_FCGI_PROCESSES=2
+    bbox-tile-server --config=bbox-ne_extracts_3857.toml --loglevel debug serve
 
 tilejson:
     curl http://localhost:8080/xyz/ne_countries.json | jq . | sed 's!http://localhost:8080/xyz!https://bbox-services.github.io/assets/tiles/ne_extracts_3857!g' > ../docs/tiles/ne_extracts_3857/ne_countries.json

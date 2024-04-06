@@ -16,7 +16,7 @@ base_dir = "../docs/tiles/ne_extracts_3857"
 [[tileset]]
 name = "ne_countries"
 tms = "WebMercatorQuad"
-cache = "tilecache"
+#cache = "tilecache"
 [tileset.postgis]
 minzoom = 0
 maxzoom = 6
