@@ -1,7 +1,7 @@
 {
   "tilejson": "3.0.0",
   "tiles": [
-    "https://bbox-services.github.io/assets/tiles/ne_extracts_3857/ne_countries/{z}/{x}/{y}.pbf"
+    "https://assets.bbox.earth/tiles/ne_extracts_3857/ne_countries/{z}/{x}/{y}.pbf"
   ],
   "vector_layers": [
     {

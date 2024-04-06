@@ -67,4 +67,4 @@ serve-3857:
     bbox-tile-server --config=bbox-ne_extracts_3857.toml --loglevel debug serve
 
 tilejson:
-    curl http://localhost:8080/xyz/ne_countries.json | jq . | sed 's!http://localhost:8080/xyz!https://bbox-services.github.io/assets/tiles/ne_extracts_3857!g' > ../docs/tiles/ne_extracts_3857/ne_countries.json
+    curl http://localhost:8080/xyz/ne_countries.json | jq . | sed 's!http://localhost:8080/xyz!https://assets.bbox.earth/tiles/ne_extracts_3857!g' > ../docs/tiles/ne_extracts_3857/ne_countries.json

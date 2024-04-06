@@ -15,7 +15,7 @@ Fonts, sprites and tiles for BBOX vector tile map examples.
 ## Linking to Assets in Styles
 
 ```
-glyphs:'https://bbox-services.github.io/assets/fonts/{fontstack}/{range}.pbf'
+glyphs:'https://assets.bbox.earth/fonts/{fontstack}/{range}.pbf'
 ```
 
 ## License
