@@ -1,0 +1,53 @@
+{
+  "tilejson": "3.0.0",
+  "tiles": [
+    "https://assets.bbox.earth/tiles/ne_extracts_4326/ne_countries/{z}/{x}/{y}.pbf"
+  ],
+  "vector_layers": [
+    {
+      "id": "country",
+      "fields": {
+        "adm0_a3": "",
+        "mapcolor7": ""
+      }
+    },
+    {
+      "id": "country-name",
+      "fields": {
+        "abbrev": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "geo-lines",
+      "fields": {
+        "name": ""
+      }
+    },
+    {
+      "id": "land-border-country",
+      "fields": {}
+    },
+    {
+      "id": "state",
+      "fields": {
+        "adm0_a3": ""
+      }
+    }
+  ],
+  "attribution": "Natural Earth v5",
+  "bounds": [
+    -179.97277,
+    -83.05457,
+    179.99366,
+    83.23559
+  ],
+  "center": [
+    0.09050999999999476,
+    0.010445000000004256,
+    2
+  ],
+  "maxzoom": 6,
+  "minzoom": 0,
+  "format": "pbf"
+}
