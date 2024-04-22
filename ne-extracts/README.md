@@ -17,4 +17,9 @@ Import GeoPackage files into PostGIS database:
 
 Create tiles:
 
-    just seed-3857
+    just seed-all
+
+View tile map:
+
+    just serve-merc
+    xdg-open http://localhost:8080/assets/maplibre.html
