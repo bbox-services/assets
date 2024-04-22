@@ -2,15 +2,6 @@
 
 set shell := ["bash", "-c"]
 
-DBNAME := "ne_extracts"
-# Default via Unix socket
-# For TCP connections call e.g. with --set DATABASE_URL "postgres://user:pass@localhost:5432/mvtbench"
-export DATABASE_URL := "postgres:///" + DBNAME
-
-@_default:
-    {{ just_executable() }} --list --unsorted
-
-
 # --- Create Natural Earth extracts
 
 # https://www.naturalearthdata.com/downloads/
@@ -44,27 +35,65 @@ create-extract srid gpkg:
 
 # --- Create PostGIS DB for BBOX
 
+export PGUSER := "equalearth"
+export PGPASSWORD := "equalearth"
+export PGDATABASE := "equalearth"
+export PGHOST := "localhost"
+export PGPORT := "5439"
+dockername := "equalearthdb"
+
+export BBOX_MAPSERVER__NUM_FCGI_PROCESSES := "1"
+
+# Start database
+start-db: start-docker-db db-is-ready
+
+# Start database
+[private]
+start-docker-db:
+    docker run -p 127.0.0.1:{{PGPORT}}:5432 -e POSTGRES_USER={{PGUSER}} -e POSTGRES_PASSWORD={{PGPASSWORD}} -d --name {{dockername}} postgis/postgis:16-3.4
+
+# Stop database
+stop-db:
+    docker stop {{dockername}}
+
+# Wait for the test database to be ready
+[private]
+db-is-ready:
+    docker exec {{dockername}} sh -c 'until pg_isready -h localhost -U postgres; do sleep 1; done'
+
 # Setup DB and import data
 create-extracts-db: create-db (import-extract "ne_4326" data + "/ne_extracts_4326.gpkg") (import-extract "ne_3857" data + "/ne_extracts_3857.gpkg") (import-extract "ne_8857" data + "/ne_extracts_8857.gpkg")
 
 # Create database
 create-db:
-    psql postgres -c "DROP DATABASE IF EXISTS {{DBNAME}}"
-    psql postgres -c "CREATE DATABASE {{DBNAME}}"
-    psql {{DBNAME}} -c "CREATE EXTENSION postgis"
+    PGDATABASE=postgres psql -c "DROP DATABASE IF EXISTS {{PGDATABASE}}"
+    PGDATABASE=postgres psql -c "CREATE DATABASE {{PGDATABASE}}"
+    psql -c "CREATE EXTENSION postgis"
 
 import-extract schema gpkg:
-    psql {{DBNAME}} -c "CREATE SCHEMA IF NOT EXISTS {{schema}}"
-    ogr2ogr -f PostgreSQL "PG:dbname={{DBNAME}}" -lco GEOMETRY_NAME=wkb_geometry -lco SCHEMA={{schema}} {{gpkg}}
+    psql -c "CREATE SCHEMA IF NOT EXISTS {{schema}}"
+    ogr2ogr -f PostgreSQL "PG:dbname={{PGDATABASE}}" -lco GEOMETRY_NAME=wkb_geometry -lco SCHEMA={{schema}} {{gpkg}}
+
+# Seed tiles
+seed srid:
+    bbox-tile-server --config=bbox-ne_extracts_{{srid}}.toml seed --tile-path=../docs/tiles/ne_extracts_{{srid}} --tileset ne_countries --maxzoom 6
 
 # Seed tiles (Mercator)
-seed-3857:
-    bbox-tile-server --config=bbox-ne_extracts_3857.toml seed --tile-path=../docs/tiles/ne_extracts_3857 --tileset ne_countries --maxzoom 6
+seed-3857: (seed "3857")
+
+seed-all: (seed "3857") (seed "8857") (seed "4326")
+
+# Run bbox tile server
+serve srid:
+    bbox-tile-server --config=bbox-ne_extracts_{{srid}}.toml --loglevel debug serve
 
 # Run bbox tile server (Mercator)
-serve-3857:
-    export BBOX_MAPSERVER__NUM_FCGI_PROCESSES=2
-    bbox-tile-server --config=bbox-ne_extracts_3857.toml --loglevel debug serve
+serve-merc: (serve "3857")
+
+# Run bbox tile server (Equal Earth)
+serve-eq: (serve "8857")
 
 tilejson:
-    curl http://localhost:8080/xyz/ne_countries.json | jq . | sed 's!http://localhost:8080/xyz!https://assets.bbox.earth/tiles/ne_extracts_3857!g' > ../docs/tiles/ne_extracts_3857/ne_countries.json
+    curl -s http://localhost:8080/xyz/ne_countries.json | jq . | sed 's!http://localhost:8080/xyz!https://assets.bbox.earth/tiles/ne_extracts_3857!g' > ../docs/tiles/ne_extracts_3857/ne_countries.json
+    test -d ../docs/tiles/ne_extracts_8857 && sed s/3857/8857/g ../docs/tiles/ne_extracts_3857/ne_countries.json >../docs/tiles/ne_extracts_8857/ne_countries.json
+    test -d ../docs/tiles/ne_extracts_4326 && sed s/3857/4326/g ../docs/tiles/ne_extracts_3857/ne_countries.json >../docs/tiles/ne_extracts_4326/ne_countries.json

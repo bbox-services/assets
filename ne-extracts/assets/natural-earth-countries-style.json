@@ -17,12 +17,13 @@
       "url": "/xyz/ne_countries.json"
     }
   },
-  "glyphs": "https://assets.bbox.earth/fonts/{fontstack}/{range}.pbf",
+  "#glyphs": "https://assets.bbox.earth/fonts/{fontstack}/{range}.pbf",
+  "glyphs": "http://localhost:8080/fonts/{fontstack}/{range}.pbf",
   "layers": [{
     "id": "background",
     "type": "background",
     "paint": {
-      "background-color": "#ddeeff"
+      "background-color": "#ffffff"
     }
   },{
     "id": "country-glow-outer",

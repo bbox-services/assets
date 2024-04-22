@@ -8,10 +8,11 @@ It reproduces the data set used in https://github.com/pka/mvt-benchmark
 
 Download NaturalEarth data and create GeoPackage files:
 
-    create-extracts
+    just create-extracts
 
 Import GeoPackage files into PostGIS database:
 
+    just start-db
     just create-extracts-db
 
 Create tiles:
