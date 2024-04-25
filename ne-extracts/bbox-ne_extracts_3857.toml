@@ -15,7 +15,8 @@ path = "/fonts"
 name = "tilecache"
 #compression = "Gzip"
 [tilestore.files]
-base_dir = "../docs/tiles/ne_extracts_3857"
+#base_dir = "../docs/tiles/ne_extracts_3857"
+base_dir = "/tmp/tilecache/ne_extracts_3857"
 
 [[tileset]]
 name = "ne_countries"
@@ -31,8 +32,8 @@ miny = -83.05457
 maxx = 179.99366
 maxy = 83.23559
 
-#[tileset.postgis.diagnostics]
-#reference_size = 800_000
+[tileset.postgis.diagnostics]
+reference_size = 800_000
 
 [[tileset.postgis.layer]]
 name = "country"

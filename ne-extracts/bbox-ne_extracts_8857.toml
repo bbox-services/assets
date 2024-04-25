@@ -34,8 +34,8 @@ miny = -83.05457
 maxx = 179.99366
 maxy = 83.23559
 
-#[tileset.postgis.diagnostics]
-#reference_size = 800_000
+[tileset.postgis.diagnostics]
+reference_size = 800_000
 
 [[tileset.postgis.layer]]
 name = "country"
