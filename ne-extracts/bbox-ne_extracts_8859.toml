@@ -3,6 +3,9 @@ name = "pg"
 [datasource.postgis]
 url = "postgresql://equalearth:equalearth@127.0.0.1:5439/equalearth"
 
+[[grid]]
+json = "EqualEarthAsiaPacificWGS84Quad.json"
+
 [[assets.static]]
 dir = "./assets"
 path = "/assets"
@@ -15,65 +18,65 @@ path = "/fonts"
 name = "tilecache"
 #compression = "Gzip"
 [tilestore.files]
-base_dir = "../docs/tiles/ne_extracts_4326"
+base_dir = "../docs/tiles/ne_extracts_8859"
 
 [[tileset]]
 name = "ne_countries"
-tms = "WorldCRS84Quad"
+tms = "EqualEarthAsiaPacificWGS84Quad"
 cache = "tilecache"
 [tileset.postgis]
 minzoom = 0
 maxzoom = 6
 attribution = "Natural Earth v5"
 
-#[tileset.postgis.diagnostics]
-#reference_size = 800_000
+[tileset.postgis.diagnostics]
+reference_size = 800_000
 
 [[tileset.postgis.layer]]
 name = "country"
 geometry_field = "wkb_geometry"
 geometry_type = "MULTIPOLYGON"
-srid = 4326
+srid = 8859
 # simplify = true
 # tolerance = "!pixel_width!/2"
 buffer_size = 3
 
 [[tileset.postgis.layer.query]]
 minzoom = 0
-sql = "SELECT wkb_geometry, adm0_a3, mapcolor7 FROM ne_4326.ne_10m_admin_0_countries WHERE min_zoom::integer <= !zoom!"
+sql = "SELECT wkb_geometry, adm0_a3, mapcolor7 FROM ne_8859.ne_10m_admin_0_countries WHERE min_zoom::integer <= !zoom!"
 
 [[tileset.postgis.layer]]
 name = "country-name"
 geometry_field = "wkb_geometry"
 geometry_type = "POINT"
-srid = 4326
+srid = 8859
 buffer_size = 0
 
 [[tileset.postgis.layer.query]]
 minzoom = 0
-sql = "SELECT wkb_geometry, abbrev, name FROM ne_4326.ne_10m_admin_0_country_points"
+sql = "SELECT wkb_geometry, abbrev, name FROM ne_8859.ne_10m_admin_0_country_points"
 
 [[tileset.postgis.layer]]
 name = "geo-lines"
 geometry_field = "wkb_geometry"
 geometry_type = "MULTILINESTRING"
-srid = 4326
+srid = 8859
 buffer_size = 0
 
 [[tileset.postgis.layer.query]]
 minzoom = 1
 maxzoom = 4
-sql = "SELECT wkb_geometry, name FROM ne_4326.ne_50m_geographic_lines"
+sql = "SELECT wkb_geometry, name FROM ne_8859.ne_50m_geographic_lines"
 
 [[tileset.postgis.layer.query]]
 minzoom = 5
-sql = "SELECT wkb_geometry, name FROM ne_4326.ne_10m_geographic_lines"
+sql = "SELECT wkb_geometry, name FROM ne_8859.ne_10m_geographic_lines"
 
 [[tileset.postgis.layer]]
 name = "land-border-country"
 geometry_field = "wkb_geometry"
 geometry_type = "MULTILINESTRING"
-srid = 4326
+srid = 8859
 fid_field = "ogc_fid"
 # simplify = true
 # tolerance = "!pixel_width!/2"
@@ -81,17 +84,17 @@ buffer_size = 0
 
 [[tileset.postgis.layer.query]]
 minzoom = 0
-sql = "SELECT wkb_geometry FROM ne_4326.ne_10m_admin_0_boundary_lines_land WHERE min_zoom::integer <= !zoom!"
+sql = "SELECT wkb_geometry FROM ne_8859.ne_10m_admin_0_boundary_lines_land WHERE min_zoom::integer <= !zoom!"
 
 [[tileset.postgis.layer]]
 name = "state"
 geometry_field = "wkb_geometry"
 geometry_type = "MULTILINESTRING"
-srid = 4326
+srid = 8859
 # simplify = true
 # tolerance = "!pixel_width!/2"
 buffer_size = 0
 
 [[tileset.postgis.layer.query]]
 minzoom = 0
-sql = "SELECT wkb_geometry, adm0_a3 FROM ne_4326.ne_10m_admin_1_states_provinces_lines WHERE min_zoom::integer <= !zoom!"
+sql = "SELECT wkb_geometry, adm0_a3 FROM ne_8859.ne_10m_admin_1_states_provinces_lines WHERE min_zoom::integer <= !zoom!"

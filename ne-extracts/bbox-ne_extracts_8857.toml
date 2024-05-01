@@ -28,11 +28,6 @@ cache = "tilecache"
 minzoom = 0
 maxzoom = 6
 attribution = "Natural Earth v5"
-[tileset.postgis.extent]
-minx = -179.97277
-miny = -83.05457
-maxx = 179.99366
-maxy = 83.23559
 
 [tileset.postgis.diagnostics]
 reference_size = 800_000
