@@ -33,6 +33,22 @@
       "fields": {
         "adm0_a3": ""
       }
+    },
+    {
+      "id": "diagnostics-tile",
+      "fields": {
+        "layer-total-percent": "Total size relative to reference size"
+      }
+    },
+    {
+      "id": "diagnostics-label",
+      "fields": {
+        "tile-bottom": "tile extent",
+        "tile-left": "tile extent",
+        "tile-right": "tile extent",
+        "tile-top": "tile extent",
+        "zxy": "tile number"
+      }
     }
   ],
   "attribution": "Natural Earth v5",
