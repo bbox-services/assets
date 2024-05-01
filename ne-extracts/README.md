@@ -13,6 +13,7 @@ Download NaturalEarth data and create GeoPackage files:
 Import GeoPackage files into PostGIS database:
 
     just start-db
+    just create-splitted-extracts
     just create-extracts-db
 
 Create tiles:
