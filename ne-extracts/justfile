@@ -125,7 +125,9 @@ seed srid:
 # Seed tiles (Mercator)
 seed-3857: (seed "3857")
 
-seed-all: (seed "3857") (seed "8857") (seed "8858") (seed "8859") (seed "4326")
+seed-eq2: (seed "8857_3857")
+
+seed-all: (seed "3857") (seed "8857") (seed "8858") (seed "8859") (seed "4326") (seed "8857_3857")
 
 # Run bbox tile server
 serve srid:
@@ -137,10 +139,13 @@ serve-merc: (serve "3857")
 # Run bbox tile server (Equal Earth)
 serve-eq: (serve "8857")
 
+serve-eq2: (serve "8857_3857")
+
 tilejson:
     # just serve-merc
-    curl -s http://localhost:8080/xyz/ne_countries.json | jq . | sed 's!http://localhost:8080/xyz!https://assets.bbox.earth/tiles/ne_extracts_3857!g' > ../docs/tiles/ne_extracts_3857/ne_countries.json
+    test -f ../docs/tiles/ne_extracts_8857/ne_countries.json || curl -s http://localhost:8080/xyz/ne_countries.json | jq . | sed 's!http://localhost:8080/xyz!https://assets.bbox.earth/tiles/ne_extracts_3857!g' > ../docs/tiles/ne_extracts_3857/ne_countries.json
     test -d ../docs/tiles/ne_extracts_8857 && sed s/3857/8857/g ../docs/tiles/ne_extracts_3857/ne_countries.json >../docs/tiles/ne_extracts_8857/ne_countries.json
     test -d ../docs/tiles/ne_extracts_8858 && sed s/3857/8858/g ../docs/tiles/ne_extracts_3857/ne_countries.json >../docs/tiles/ne_extracts_8858/ne_countries.json
     test -d ../docs/tiles/ne_extracts_8859 && sed s/3857/8859/g ../docs/tiles/ne_extracts_3857/ne_countries.json >../docs/tiles/ne_extracts_8859/ne_countries.json
     test -d ../docs/tiles/ne_extracts_4326 && sed s/3857/4326/g ../docs/tiles/ne_extracts_3857/ne_countries.json >../docs/tiles/ne_extracts_4326/ne_countries.json
+    test -d ../docs/tiles/ne_extracts_8857_3857 && sed s/3857/8857_3857/g ../docs/tiles/ne_extracts_3857/ne_countries.json >../docs/tiles/ne_extracts_8857_3857/ne_countries.json
