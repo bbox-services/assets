@@ -51,7 +51,7 @@ start-db: start-docker-db db-is-ready
 # Start database
 [private]
 start-docker-db:
-    docker run -p 127.0.0.1:{{PGPORT}}:5432 -e POSTGRES_USER={{PGUSER}} -e POSTGRES_PASSWORD={{PGPASSWORD}} -d --name {{dockername}} postgis/postgis:16-3.4
+    docker run -p 127.0.0.1:{{PGPORT}}:5432 -e POSTGRES_USER={{PGUSER}} -e POSTGRES_PASSWORD={{PGPASSWORD}} -d --rm --name {{dockername}} postgis/postgis:16-3.4
 
 # Stop database
 stop-db:
@@ -125,9 +125,12 @@ seed srid:
 # Seed tiles (Mercator)
 seed-3857: (seed "3857")
 
-seed-eq2: (seed "8857_3857")
+# Run tiles (Equal Earth / Mercator combined)
+seed-eq2:
+    bbox-tile-server --config=bbox-ne_extracts_8857.toml seed --tile-path=../docs/tiles/ne_extracts_8857_3857 --tileset ne_countries --maxzoom 2
+    bbox-tile-server --config=bbox-ne_extracts_3857.toml seed --tile-path=../docs/tiles/ne_extracts_8857_3857 --tileset ne_countries --minzoom 3 --maxzoom 6
 
-seed-all: (seed "3857") (seed "8857") (seed "8858") (seed "8859") (seed "4326") (seed "8857_3857")
+seed-all: (seed "3857") (seed "8857") (seed "8858") (seed "8859") (seed "4326") seed-eq2
 
 # Run bbox tile server
 serve srid:
@@ -139,7 +142,9 @@ serve-merc: (serve "3857")
 # Run bbox tile server (Equal Earth)
 serve-eq: (serve "8857")
 
+# Run bbox tile server (Equal Earth / Mercator combined)
 serve-eq2: (serve "8857_3857")
+    @# bbox-tile-server --config=bbox-ne_extracts_3857.toml --tile-path=../docs/tiles/ne_extracts_8857_3857 serve
 
 tilejson:
     # just serve-merc
